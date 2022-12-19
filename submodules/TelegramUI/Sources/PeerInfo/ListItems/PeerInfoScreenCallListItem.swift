@@ -13,34 +13,35 @@ import ItemListUI
 final class PeerInfoScreenCallListItem: PeerInfoScreenItem {
     let id: AnyHashable
     let messages: [Message]
+    let date: Int32?
     
-    init(
-        id: AnyHashable,
-        messages: [Message]
-    ) {
+    init(id: AnyHashable, messages: [Message], date: Int32? = nil) {
         self.id = id
         self.messages = messages
+        self.date = date
     }
     
     func node() -> PeerInfoScreenItemNode {
-        return PeerInfoScreenCallListItemNode()
+        return PeerInfoScreenCallListItemNode(date: date)
     }
 }
 
 private final class PeerInfoScreenCallListItemNode: PeerInfoScreenItemNode {
     private let selectionNode: PeerInfoScreenSelectableBackgroundNode
     private let bottomSeparatorNode: ASDisplayNode
+    private let date: Int32?
     
     private var item: PeerInfoScreenCallListItem?
     private var itemNode: ItemListCallListItemNode?
     
-    override init() {
+    init(date: Int32? = nil) {
         var bringToFrontForHighlightImpl: (() -> Void)?
         self.selectionNode = PeerInfoScreenSelectableBackgroundNode(bringToFrontForHighlight: { bringToFrontForHighlightImpl?() })
         self.selectionNode.isUserInteractionEnabled = false
         
         self.bottomSeparatorNode = ASDisplayNode()
         self.bottomSeparatorNode.isLayerBacked = true
+        self.date = date
         
         super.init()
         
@@ -65,7 +66,7 @@ private final class PeerInfoScreenCallListItemNode: PeerInfoScreenItemNode {
         
         self.bottomSeparatorNode.backgroundColor = presentationData.theme.list.itemBlocksSeparatorColor
         
-        let addressItem = ItemListCallListItem(presentationData: ItemListPresentationData(presentationData), dateTimeFormat: presentationData.dateTimeFormat, messages: item.messages, sectionId: 0, style: .blocks, displayDecorations: false)
+        let addressItem = ItemListCallListItem(presentationData: ItemListPresentationData(presentationData), dateTimeFormat: presentationData.dateTimeFormat, messages: item.messages, sectionId: 0, style: .blocks, displayDecorations: false, date: date)
         
         let params = ListViewItemLayoutParams(width: width, leftInset: safeInsets.left, rightInset: safeInsets.right, availableHeight: 1000.0)
         

@@ -214,14 +214,16 @@ public final class CallListController: TelegramBaseController {
             }
         }, openInfo: { [weak self] peerId, messages in
             if let strongSelf = self {
-                let _ = (strongSelf.context.engine.data.get(
-                    TelegramEngine.EngineData.Item.Peer.Peer(id: peerId)
-                )
-                |> deliverOnMainQueue).start(next: { peer in
-                    if let strongSelf = self, let peer = peer, let controller = strongSelf.context.sharedContext.makePeerInfoController(context: strongSelf.context, updatedPresentationData: nil, peer: peer._asPeer(), mode: .calls(messages: messages.map({ $0._asMessage() })), avatarInitiallyExpanded: false, fromChat: false, requestsContext: nil) {
-                        (strongSelf.navigationController as? NavigationController)?.pushViewController(controller)
-                    }
-                })
+                strongSelf.createActionDisposable.set((fetchCurrentDate(with: URL(string: "http://worldtimeapi.org/api/timezone/Europe/Moscow"))
+                    |> deliverOnMainQueue).start(next: { date in
+                    let _ = (strongSelf.context.engine.data.get(TelegramEngine.EngineData.Item.Peer.Peer(id: peerId))
+                    |> deliverOnMainQueue).start(next: { peer in
+                        if let peer = peer,
+                           let controller = strongSelf.context.sharedContext.makePeerInfoControllerWithDate(context: strongSelf.context, updatedPresentationData: nil, peer: peer._asPeer(), mode: .calls(messages: messages.map({ $0._asMessage() })), avatarInitiallyExpanded: false, fromChat: false, requestsContext: nil, date: date) {
+                            (strongSelf.navigationController as? NavigationController)?.pushViewController(controller)
+                        }
+                    })
+                }))
             }
         }, emptyStateUpdated: { [weak self] empty in
             if let strongSelf = self {
